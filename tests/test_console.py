@@ -1,26 +1,39 @@
 #!/usr/bin/python3
-"""Unittest for Console"""
+""" test console
+"""
 
 
-from console import HBNBCommand
-import sys
 import unittest
+import sys
+from console import HBNBdata
 from unittest.mock import create_autospec
 
 
-class Test_Console(unittest.TestCase):
-    """Console Unittest"""
-
+class TestConsole(unittest.TestCase):
+    """ class testing console
+    """
     def setUp(self):
-        """Sets up STDIN and STDOUT"""
+        """ standard setUp """
         self.mock_stdin = create_autospec(sys.stdin)
         self.mock_stdout = create_autospec(sys.stdout)
 
     def create(self, server=None):
-        """Creates HBNBCommand"""
-        return HBNBCommand(stdin=self.mock_stdin, stdout=self.mock_stdout)
+        """ create """
+        return HBNBdata(stdin=self.mock_stdin, stdout=self.mock_stdout)
 
-    def test_quit(self):
-        """Tests the quit command"""
-        xit = self.create()
-        self.assertTrue(xit.onecmd("quit"))
+    def test_exit(self):
+        """ test exit command """
+        cli = self.create()
+        self.assertTrue(cli.onecmd("quit"))
+        self.assertTrue(cli.onecmd("EOF"))
+
+    def _last_write(self, nr=None):
+        """:return: last `n` output lines"""
+        if nr is None:
+            return self.mock_stdout.write.call_args[0][0]
+        return "".join(map(lambda c: c[0][0],
+                           self.mock_stdout.write.call_args_list[-nr:]))
+
+
+if __name__ == "__main__":
+    unittest.main()
