@@ -1,108 +1,93 @@
 #!/usr/bin/python3
-"""
-Unittest for base_model
-"""
+""" Contains unit tests for class BaseModel """
 
 
-import unittest
-from models.base_model import BaseModel
-import os
 import pep8
+import unittest
+import io
+import sys
+from datetime import datetime
+from models.base_model import BaseModel
+import models
 
 
-class Test_BaseModel(unittest.TestCase):
+class TestBaseModel(unittest.TestCase):
+    """test for class BaseModel and its methods
     """
-    Test class BaseModel
-    """
-    def test_docstring(self):
-        """Checks if the docstring exists"""
-        self.assertTrue(len(BaseModel.__doc__) > 1)
-        self.assertTrue(len(BaseModel.__init__.__doc__) > 1)
-        self.assertTrue(len(BaseModel.__str__.__doc__) > 1)
-        self.assertTrue(len(BaseModel.save.__doc__) > 1)
-        self.assertTrue(len(BaseModel.to_dict.__doc__) > 1)
-
-    def test_pep8(self):
-        """Pep8 Test"""
-        style = pep8.StyleGuide(quiet=True)
-        result = style.check_files(['models/base_model.py'])
-        self.assertEqual(result.total_errors, 0, "fix pep8")
-
     def setUp(self):
+        """ Set up method
         """
-        Setups test
+        self.base1 = BaseModel()
+        self.base2 = BaseModel()
+
+    def tearDown(self):
+        """ Tear down method
         """
         pass
 
-    def tearDown(self):
+    def test_base_pep8(self):
+        """ test pep8
         """
-        Resets tests
+        pep8style = pep8.StyleGuide(quiet=True)
+        result = pep8style.check_files(['./models/base_model.py'])
+        self.assertEqual(result.total_errors, 0)
+
+    def test_docstring(self):
+        """ test doc in the file
         """
-        try:
-            os.remove("file.json")
-        except:
-            pass
+        self.assertIsNotNone(BaseModel.__doc__)
+        self.assertIsNotNone(BaseModel.__init__.__doc__)
+        self.assertIsNotNone(BaseModel.save.__doc__)
 
-    def test_init_arg(self):
-        """Pass an arg into the instance"""
-        b1 = BaseModel(12)
-        self.assertEqual(type(b1).__name__, "BaseModel")
-        self.assertFalse(hasattr(b1, "12"))
+    def test_uuid(self):
+        """ Test for uuid
+        """
+        self.assertNotEqual(self.base1.id, self.base2.id)
+        self.assertTrue(hasattr(self.base1, "id"))
+        self.assertEqual(type(self.base1.id), str)
+        self.assertEqual(type(self.base2.id), str)
 
-    def test_init_kwarg(self):
-        """Pass kwargs into the instance"""
-        b1 = BaseModel(name="Red")
-        self.assertEqual(type(b1).__name__, "BaseModel")
-        self.assertTrue(hasattr(b1, "name"))
-        self.assertTrue(hasattr(b1, "__class__"))
-        self.assertFalse(hasattr(b1, "id"))
-        self.assertFalse(hasattr(b1, "created_at"))
-        self.assertFalse(hasattr(b1, "updated_at"))
+    def test_instance(self):
+        """ Test for instance
+        """
+        self.assertTrue(isinstance(self.base1, BaseModel))
+        self.assertTrue(isinstance(self.base2, BaseModel))
 
-    def test_str_method(self):
-        """Tests to see if the method is printing accurately"""
-        b1 = BaseModel()
-        b1printed = b1.__str__()
-        self.assertEqual(b1printed,
-                         "[BaseModel] ({}) {}".format(b1.id, b1.__dict__))
-
-    def test_before_todict(self):
-        """Tests the instance before using the todict conversion"""
-        b1 = BaseModel()
-        b1_dict = b1.__dict__
-        self.assertEqual(type(b1).__name__, "BaseModel")
-        self.assertTrue(hasattr(b1, '__class__'))
-        self.assertEqual(str(b1.__class__),
-                         "<class 'models.base_model.BaseModel'>")
-        self.assertTrue(type(b1_dict['created_at']), 'datetime.datetime')
-        self.assertTrue(type(b1_dict['updated_at']), 'datetime.datetime')
-        self.assertTrue(type(b1_dict['id']), 'str')
-
-    def test_after_todict(self):
-        """Tests instances after using to_dict conversion"""
-        my_model = BaseModel()
-        new_model = BaseModel()
-        test_dict = my_model.to_dict()
-        self.assertIsInstance(my_model, BaseModel)
-        self.assertEqual(type(my_model).__name__, "BaseModel")
-        self.assertEqual(test_dict['__class__'], "BaseModel")
-        self.assertTrue(type(test_dict['__class__']), 'str')
-        self.assertTrue(type(test_dict['created_at']), 'str')
-        self.assertTrue(type(test_dict['updated_at']), 'str')
-        self.assertTrue(type(test_dict['id']), 'str')
-        self.assertNotEqual(my_model.id, new_model.id)
-
-    def test_hasattribute(self):
-        """Tests if the instance of BaseModel have been correctly made"""
-        b1 = BaseModel()
-        self.assertTrue(hasattr(b1, "__init__"))
-        self.assertTrue(hasattr(b1, "created_at"))
-        self.assertTrue(hasattr(b1, "updated_at"))
-        self.assertTrue(hasattr(b1, "id"))
+    def test_type(self):
+        """ Test for type of object
+        """
+        self.assertEqual(type(self.base1), BaseModel)
+        self.assertEqual(type(self.base2), BaseModel)
 
     def test_save(self):
-        """Tests to see if the save fuction works"""
-        b1 = BaseModel()
-        b1.save()
-        b_dict = b1.to_dict()
-        self.assertNotEqual(b_dict['created_at'], b_dict['updated_at'])
+        """ Test for save
+        """
+        time = self.base1.updated_at
+        self.base1.save()
+        self.assertFalse(time == self.base1.updated_at)
+
+    def test_update(self):
+        """ Test for update
+        """
+        self.base1.name = "Holberton"
+        self.assertTrue(hasattr(self.base1, "name"))
+
+    def test_init_with_kwargs(self):
+        """ Test to init for kwargs
+        """
+        self.base1.name = "Holberton"
+        model_json = self.base1.to_dict()
+        new_model = BaseModel(**model_json)
+        self.assertDictEqual(model_json, new_model.to_dict())
+        self.assertIn("name", new_model.to_dict())
+        self.assertIsNot(self.base1, new_model)
+
+    def test_storage(self):
+        """ Test to staorage
+        """
+        obj_dict = models.storage.all()
+        self.assertTrue(obj_dict)
+
+
+if __name__ == '__main__':
+    unittest.main()
