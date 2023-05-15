@@ -1,78 +1,51 @@
 #!/usr/bin/python3
-"""
-class Base model
-"""
-
-
+"""Defines the BaseModel class."""
+import models
 from uuid import uuid4
 from datetime import datetime
-import models
-
-
-def time_conversor(obj):
-    """ Define time conversor
-        that return new time object
-    """
-    if type(obj) in [datetime]:
-        obj = obj.strftime('%Y-%m-%dT%H:%M:%S.%f')
-    return datetime.strptime(obj, "%Y-%m-%dT%H:%M:%S.%f")
 
 
 class BaseModel:
-    """ Class Base Model
-    """
+    """Represents the BaseModel of the HBnB project."""
+
     def __init__(self, *args, **kwargs):
-        """ Initialize method init
-            Base instance
+        """Initialize a new BaseModel.
+
+        Args:
+            *args (any): Unused.
+            **kwargs (dict): Key/value pairs of attributes.
         """
-        if kwargs:
-            self.created_at = time_conversor(kwargs["created_at"])
-            self.updated_at = time_conversor(kwargs["updated_at"])
+        tform = "%Y-%m-%dT%H:%M:%S.%f"
+        self.id = str(uuid4())
+        self.created_at = datetime.today()
+        self.updated_at = datetime.today()
+        if len(kwargs) != 0:
             for k, v in kwargs.items():
-                if k == '__class__':
-                    continue
+                if k == "created_at" or k == "updated_at":
+                    self.__dict__[k] = datetime.strptime(v, tform)
                 else:
-                    setattr(self, k, v)
+                    self.__dict__[k] = v
         else:
-            self.id = str(uuid4())
-            self.created_at = datetime.today().isoformat()
-            self.updated_at = datetime.today().isoformat()
             models.storage.new(self)
 
-    def __str__(self):
-        """ Define method str that return
-            string representation
-        """
-        self.__dict__.update({
-            "created_at": time_conversor(self.created_at),
-            "updated_at": time_conversor(self.updated_at),
-        })
-        return "[{:s}] ({:s}) {}".format(
-            self.__class__.__name__, self.id, self.__dict__)
-
-    def __repr__(self):
-        """ Define method repr that return
-            string representation
-        """
-        return "[{:s}] ({:s}) {}".format(
-            self.__class__.__name__, self.id, self.__dict__)
-
     def save(self):
-        """ method save that calls storage
-        """
+        """Update updated_at with the current datetime."""
         self.updated_at = datetime.today()
         models.storage.save()
 
     def to_dict(self):
-        """ Method to dictionary
-            that return dict representation
+        """Return the dictionary of the BaseModel instance.
+
+        Includes the key/value pair __class__ representing
+        the class name of the object.
         """
-        if type(self.created_at) in [str]:
-            self.created_at = time_conversor(self.created_at)
-        if type(self.updated_at) in [str]:
-            self.updated_at = time_conversor(self.updated_at)
-        self.created_at = self.created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')
-        self.updated_at = self.updated_at.strftime('%Y-%m-%dT%H:%M:%S.%f')
-        aux_val = (self.__dict__).copy()
-        aux_val['__class__'] = self.__class__.__name__
-        return aux_val
+        rdict = self.__dict__.copy()
+        rdict["created_at"] = self.created_at.isoformat()
+        rdict["updated_at"] = self.updated_at.isoformat()
+        rdict["__class__"] = self.__class__.__name__
+        return rdict
+
+    def __str__(self):
+        """Return the print/str representation of the BaseModel instance."""
+        clname = self.__class__.__name__
+        return "[{}] ({}) {}".format(clname, self.id, self.__dict__)
