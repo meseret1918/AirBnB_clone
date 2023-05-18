@@ -1,42 +1,40 @@
-#!/usr/bin/python
-"""
-Test user class
-"""
+#!/usr/bin/python3
+"""Unittest for user file: class and methods"""
+
+import pep8
 import unittest
+from models import user
 from models.user import User
 
 
-class TestUser(unittest.TestCase):
-    """test for user"""
-    def setUp(self):
-        """ standard setUp()
-        """
-        self.model = User()
+class TestBaseModelpep8(unittest.TestCase):
+    """Validate pep8"""
 
-    def test_public_attr(self):
-        """ if public attributes are exist and if equal to empty string
-        """
-        self.assertTrue(hasattr(self.model, "email"))
-        self.assertTrue(hasattr(self.model, "password"))
-        self.assertTrue(hasattr(self.model, "first_name"))
-        self.assertTrue(hasattr(self.model, "last_name"))
-        self.assertEqual(self.model.email, "")
-        self.assertEqual(self.model.password, "")
-        self.assertEqual(self.model.first_name, "")
-        self.assertEqual(self.model.last_name, "")
-
-    def test_strings(self):
-        """ input for each attr
-        """
-        self.model.email = "airbnb@holbertonshool.com"
-        self.model.password = "root"
-        self.model.first_name = "Betty"
-        self.model.last_name = "Holberton"
-        self.assertEqual(self.model.email, "airbnb@holbertonshool.com")
-        self.assertEqual(self.model.password, "root")
-        self.assertEqual(self.model.first_name, "Betty")
-        self.assertEqual(self.model.last_name, "Holberton")
+    def test_pep8(self):
+        """test for base file and test_base file pep8"""
+        style = pep8.StyleGuide(quiet=True)
+        user_pep8 = "models/user.py"
+        test_user_pep8 = "tests/test_models/test_user.py"
+        result = style.check_files([user_pep8, test_user_pep8])
+        self.assertEqual(result.total_errors, 0)
 
 
-if __name__ == '__main__':
+class TestDocsBaseModel(unittest.TestCase):
+    """test docstrings for base and test_base files"""
+
+    def test_module(self):
+        """check module docstrings"""
+        self.assertTrue(len(user.__doc__) > 0)
+
+    def test_class(self):
+        """check class docstrings"""
+        self.assertTrue(len(User.__doc__) > 0)
+
+    def test_method(self):
+        """check method docstrings"""
+        for func in dir(User):
+            self.assertTrue(len(func.__doc__) > 0)
+
+
+if __name__ == "__main__":
     unittest.main()

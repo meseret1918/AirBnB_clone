@@ -1,41 +1,40 @@
 #!/usr/bin/python3
-"""
-Test review class
-"""
+"""Unittest for state file: class and methods"""
 
-
+import pep8
 import unittest
-from models.review import Review
+from models import state
+from models.state import State
 
 
-class TestReview(unittest.TestCase):
-    """ test for review
-    """
-    def setUp(self):
-        """ standard setUp()
-        """
-        self.model = Review()
+class TestBaseModelpep8(unittest.TestCase):
+    """Validate pep8"""
 
-    def test_public_attr(self):
-        """ if public attribute exists and if equal to empty string
-        """
-        self.assertTrue(hasattr(self.model, "place_id"))
-        self.assertTrue(hasattr(self.model, "user_id"))
-        self.assertTrue(hasattr(self.model, "text"))
-        self.assertEqual(self.model.place_id, "")
-        self.assertEqual(self.model.user_id, "")
-        self.assertEqual(self.model.text, "")
-
-    def test_strings(self):
-        """ input for each attr
-        """
-        self.model.place_id = 42
-        self.model.user_id = 98
-        self.model.text = "foo"
-        self.assertEqual(self.model.place_id, 42)
-        self.assertEqual(self.model.user_id, 98)
-        self.assertEqual(self.model.text, "foo")
+    def test_pep8(self):
+        """test for base file and test_base file pep8"""
+        style = pep8.StyleGuide(quiet=True)
+        state_pep8 = "models/state.py"
+        test_state_pep8 = "tests/test_models/test_state.py"
+        result = style.check_files([state_pep8, test_state_pep8])
+        self.assertEqual(result.total_errors, 0)
 
 
-if __name__ == '__main__':
+class TestDocsBaseModel(unittest.TestCase):
+    """test docstrings for base and test_base files"""
+
+    def test_module(self):
+        """check module docstrings"""
+        self.assertTrue(len(state.__doc__) > 0)
+
+    def test_class(self):
+        """check class docstrings"""
+        self.assertTrue(len(State.__doc__) > 0)
+
+    def test_method(self):
+        """check method docstrings"""
+        for func in dir(State):
+            self.assertTrue(len(func.__doc__) > 0)
+
+
+if __name__ == "__main__":
     unittest.main()
